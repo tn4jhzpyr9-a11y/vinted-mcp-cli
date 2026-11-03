@@ -55,7 +55,7 @@ export async function opCompare(
     if (!COUNTRIES.includes(c)) throw new Error(`Unknown country: ${String(c)}`);
   }
   const limit = Math.min(Math.max(Math.trunc(input.limit ?? 20) || 20, 1), 96);
-  const concurrency = Math.max(1, Math.min(input.concurrency ?? 3, 6));
+const concurrency = 1;
 
   const extra = Object.fromEntries(
     Object.entries({

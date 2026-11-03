@@ -372,13 +372,32 @@ function makeServer(sharedClient?: VintedClient): Server {
             (url): url is string => typeof url === 'string'
           );
 
-          const images = await fetchItemPhotoBlocks(urls);
+const images: Array<
+  | { type: 'text'; text: string }
+  | { type: 'image'; data: string; mimeType: string }
+> = [];
+
+let photoCount = 0;
+
+for (const [index, url] of urls.entries()) {
+  const photos = await fetchItemPhotoBlocks([url]);
+
+  if (photos.length > 0) {
+    images.push({
+      type: 'text',
+      text: `Annonce ${index + 1} - Photo : ${url}`,
+    });
+
+    images.push(...photos);
+    photoCount += photos.length;
+  }
+}
 
           return {
             content: [
               {
                 type: 'text' as const,
-                text: `${images.length} photo(s) récupérée(s).`,
+                text: `${photoCount} photo(s) récupérée(s).`,
               },
               ...images,
             ],

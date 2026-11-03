@@ -99,7 +99,19 @@ const concurrency = 1;
     };
   }
 
-  const byMedian = [...stats].sort((a, b) => a.medianPrice - b.medianPrice);
+const byMedian = [...stats]
+  .filter((s) => s.currency === 'EUR')
+  .sort((a, b) => a.medianPrice - b.medianPrice);
+if (byMedian.length === 0) {
+  return {
+    query: input.query,
+    countries: stats,
+    bestBuyCountry: null,
+    bestSellCountry: null,
+    arbitrageSpreadPct: 0,
+    ...(failed.length ? { failed } : {}),
+  };
+}
   const lo = byMedian[0];
   const hi = byMedian[byMedian.length - 1];
   const spread = lo.medianPrice > 0 ? ((hi.medianPrice - lo.medianPrice) / lo.medianPrice) * 100 : 0;

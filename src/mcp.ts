@@ -17,7 +17,7 @@ import { VERSION } from './version.js';
 const TOOLS = [
     {
     name: 'get_item_photos',
-    description: 'Retrieve actual Vinted item photos as images for Claude.',
+description: 'Retrieve real Vinted photos for visual analysis. Use photoUrls from search_items to fetch images directly without opening item pages. Provide itemUrls in the same order to associate each photo with its Vinted listing. Supports up to 4 photos per request. Helps assess clothing condition and authenticity indicators, but cannot guarantee authenticity.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -401,7 +401,7 @@ text: Array.isArray(args.itemUrls) &&
             content: [
               {
                 type: 'text' as const,
-                text: `${photoCount} photo(s) récupérée(s).`,
+text: `${photoCount} photo(s) récupérée(s).\n\n`,
               },
               ...images,
             ],

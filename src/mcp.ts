@@ -24,6 +24,7 @@ const TOOLS = [
         itemId: { type: 'integer' },
         url: { type: 'string' },
         country: { type: 'string', enum: COUNTRIES, default: 'fr' },
+photoUrls: { type: 'array', items: { type: 'string' }, description: 'Direct Vinted image URLs from search results' },
       },
     },
   },
@@ -363,6 +364,26 @@ function makeServer(sharedClient?: VintedClient): Server {
   server.setRequestHandler(CallToolRequestSchema, async (req) => {
     try {
             if (req.params.name === 'get_item_photos') {
+        const args = req.params.arguments ?? {};
+        const directUrls = args.photoUrls;
+
+        if (Array.isArray(directUrls)) {
+          const urls = directUrls.filter(
+            (url): url is string => typeof url === 'string'
+          );
+
+          const images = await fetchItemPhotoBlocks(urls);
+
+          return {
+            content: [
+              {
+                type: 'text' as const,
+                text: `${images.length} photo(s) récupérée(s).`,
+              },
+              ...images,
+            ],
+          };
+        }
         const item = await callTool(
           getClient(),
           'get_item',

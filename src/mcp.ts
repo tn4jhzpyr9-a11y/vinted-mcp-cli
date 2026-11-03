@@ -11,9 +11,22 @@ import { VintedClient } from './client/session.js';
 import { COUNTRIES } from './client/types.js';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { callTool } from './dispatch.js';
+import { fetchItemPhotoBlocks } from './ops/item-photos.js';
 import { VERSION } from './version.js';
 
 const TOOLS = [
+    {
+    name: 'get_item_photos',
+    description: 'Retrieve actual Vinted item photos as images for Claude.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        itemId: { type: 'integer' },
+        url: { type: 'string' },
+        country: { type: 'string', enum: COUNTRIES, default: 'fr' },
+      },
+    },
+  },
   {
     name: 'search_items',
     description: 'Search Vinted second-hand listings with rich filters across 19 country sites. Returns a paginated list of items — each with title, price, currency, brand, size, condition, photo URL, item URL, favourite count, and seller info. Use get_categories to discover valid categoryId values and search_brands to resolve brand names to IDs. For comprehensive multi-page results use search_all_items instead.',
@@ -349,6 +362,29 @@ function makeServer(sharedClient?: VintedClient): Server {
 
   server.setRequestHandler(CallToolRequestSchema, async (req) => {
     try {
+            if (req.params.name === 'get_item_photos') {
+        const item = await callTool(
+          getClient(),
+          'get_item',
+          req.params.arguments
+        ) as { photos?: string[] };
+
+        const photos = Array.isArray(item.photos)
+          ? item.photos.filter((p): p is string => typeof p === 'string')
+          : [];
+
+        const images = await fetchItemPhotoBlocks(photos);
+
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `${images.length} photo(s) récupérée(s) sur ${photos.length}.`,
+            },
+            ...images,
+          ],
+        };
+      }
       const result = await callTool(getClient(), req.params.name, req.params.arguments);
       return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
     } catch (e) {

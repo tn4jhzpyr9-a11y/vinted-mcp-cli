@@ -50,7 +50,7 @@ export async function opCompare(
   },
 ): Promise<CompareResult> {
   if (!input.query?.trim()) throw new Error('query is required');
-  const countries = [...new Set(input.countries ?? (['fr', 'de', 'it', 'es', 'nl', 'pl'] as Country[]))];
+const countries = [...new Set(input.countries ?? COUNTRIES)];
   for (const c of countries) {
     if (!COUNTRIES.includes(c)) throw new Error(`Unknown country: ${String(c)}`);
   }
@@ -142,6 +142,7 @@ async function runWithConcurrency<T, R>(
       const i = cursor++;
       if (i >= items.length) return;
       out[i] = await fn(items[i]);
+await new Promise((resolve) => setTimeout(resolve, 2000));
     }
   });
   await Promise.all(workers);

@@ -25,6 +25,7 @@ const TOOLS = [
         url: { type: 'string' },
         country: { type: 'string', enum: COUNTRIES, default: 'fr' },
 photoUrls: { type: 'array', items: { type: 'string' }, description: 'Direct Vinted image URLs from search results' },
+itemUrls: { type: 'array', items: { type: 'string' }, description: 'Vinted item links corresponding to photoUrls, in the same order' },
       },
     },
   },
@@ -385,7 +386,10 @@ for (const [index, url] of urls.entries()) {
   if (photos.length > 0) {
     images.push({
       type: 'text',
-      text: `Annonce ${index + 1} - Photo : ${url}`,
+text: Array.isArray(args.itemUrls) &&
+  typeof args.itemUrls[index] === 'string'
+    ? `Annonce ${index + 1} - Lien Vinted : ${args.itemUrls[index]} - Photo : ${url}`
+    : `Annonce ${index + 1} - Photo : ${url}`,
     });
 
     images.push(...photos);
